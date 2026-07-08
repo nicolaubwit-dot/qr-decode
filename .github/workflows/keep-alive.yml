@@ -1,16 +1,32 @@
 name: keep-alive-qr
 on:
   schedule:
-    # cada 10 min, L-V. GitHub usa UTC → 5-19 UTC ≈ 7-20/21 hora de Madrid
-    - cron: '*/10 5-19 * * 1-5'
-  workflow_dispatch:   # para lanzarlo a mano y probar
+    - cron: '*/10 5-19 * * 1-5'   # ping cada 10 min, L-V, 7-21h Madrid
+    - cron: '0 6 1 * *'            # commit vacío el día 1 de cada mes
+  workflow_dispatch:
+
+permissions:
+  contents: write   # necesario para el commit automático
 
 jobs:
   ping:
+    if: github.event.schedule != '0 6 1 * *'
     runs-on: ubuntu-latest
     steps:
-      - name: Despertar Render (espera el cold start)
+      - name: Despertar Render
         run: |
           curl -sS -f --max-time 120 --retry 3 --retry-delay 20 --retry-all-errors \
             https://qr-decode-p1az.onrender.com/ \
             -o /dev/null -w "HTTP %{http_code} en %{time_total}s\n"
+
+  keepalive-commit:
+    if: github.event.schedule == '0 6 1 * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Commit vacío mensual
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "chore: keep-alive [skip ci]"
+          git push
