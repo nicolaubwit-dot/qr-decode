@@ -41,7 +41,7 @@ def decode_bytes(raw):
             pass
     return data
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def health():
     return {"status": "ok"}
 
