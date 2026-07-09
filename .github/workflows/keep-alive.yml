@@ -1,7 +1,7 @@
 name: keep-alive-qr
 on:
   schedule:
-    - cron: '*/10 5-19 * * 1-5'   # ping cada 10 min, L-V, 7-21h Madrid
+    - cron: '*/5 5-19 * * 1-5'   # ping cada 10 min, L-V, 7-21h Madrid
     - cron: '0 6 1 * *'            # commit vacío el día 1 de cada mes
   workflow_dispatch:
 
