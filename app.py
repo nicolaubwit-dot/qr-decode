@@ -1,11 +1,14 @@
 import io
+import os
 import cv2
 import numpy as np
 from PIL import Image
 from pyzbar.pyzbar import decode as zbar_decode
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Header, HTTPException
 
 app = FastAPI(title="QR decode service")
+
+API_KEY = os.environ.get("QR_API_KEY")
 
 def _try(gray):
     for scale in (1.0, 0.75, 0.6, 0.5, 0.4, 0.3):
@@ -47,7 +50,9 @@ def health():
 
 # Same path and same response shape as goQR, so in Make you only swap the URL.
 @app.post("/v1/read-qr-code/")
-async def read_qr(file: UploadFile = File(...)):
+async def read_qr(file: UploadFile = File(...), x_api_key: str | None = Header(default=None)):
+    if API_KEY and x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="unauthorized")
     data = decode_bytes(await file.read())
     err = None if data else "could not find/read QR Code"
     return [{"type": "qrcode", "symbol": [{"seq": 0, "data": data, "error": err}]}]
