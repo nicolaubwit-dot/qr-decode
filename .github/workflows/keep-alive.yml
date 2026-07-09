@@ -2,7 +2,7 @@ name: keep-alive-qr
 on:
   schedule:
     - cron: '3-58/5 5-19 * * 1-5'   # ping cada 5 min, L-V, 7-21h Madrid
-    - cron: '0 6 1,15 * *'          # commit vacío los días 1 y 15 de cada mes
+    - cron: '0 2 1,15 * *'          # commit vacío días 1 y 15, de madrugada (4h Madrid)
   workflow_dispatch:
 
 permissions:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   ping:
-    if: github.event.schedule != '0 6 1,15 * *'
+    if: github.event.schedule != '0 2 1,15 * *'
     runs-on: ubuntu-latest
     steps:
       - name: Despertar Render
@@ -20,7 +20,7 @@ jobs:
             -o /dev/null -w "HTTP %{http_code} en %{time_total}s\n"
 
   keepalive-commit:
-    if: github.event.schedule == '0 6 1,15 * *'
+    if: github.event.schedule == '0 2 1,15 * *'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
